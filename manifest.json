@@ -1,1 +1,21 @@
-
+{
+  "name": "AGENCY: Spy Protocol",
+  "short_name": "Spy Game",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#080c0a",
+  "theme-color": "#080c0a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23080c0a'/><path d='M256 120c45 0 85 30 95 72h-190c10-42 50-72 95-72zm0-30c-15 0-25 10-25 25h50c0-15-10-25-25-25z' fill='%2300ff88'/><path d='M120 220h272v30c0 40-30 70-70 70h-132c-40 0-70-30-70-70v-30z' fill='%2300ff88'/><circle cx='195' cy='255' r='25' fill='%23080c0a'/><circle cx='317' cy='255' r='25' fill='%23080c0a'/><path d='M170 255h50M292 255h50M220 255h72' stroke='%2300ff88' stroke-width='6' stroke-linecap='round'/><path d='M130 350c30 40 80 60 126 60s96-20 126-60' fill='none' stroke='%2300ff88' stroke-width='10' stroke-linecap='round'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23080c0a'/><path d='M256 120c45 0 85 30 95 72h-190c10-42 50-72 95-72zm0-30c-15 0-25 10-25 25h50c0-15-10-25-25-25z' fill='%2300ff88'/><path d='M120 220h272v30c0 40-30 70-70 70h-132c-40 0-70-30-70-70v-30z' fill='%2300ff88'/><circle cx='195' cy='255' r='25' fill='%23080c0a'/><circle cx='317' cy='255' r='25' fill='%23080c0a'/><path d='M170 255h50M292 255h50M220 255h72' stroke='%2300ff88' stroke-width='6' stroke-linecap='round'/><path d='M130 350c30 40 80 60 126 60s96-20 126-60' fill='none' stroke='%2300ff88' stroke-width='10' stroke-linecap='round'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
