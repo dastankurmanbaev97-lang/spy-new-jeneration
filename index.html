@@ -41,6 +41,7 @@
 
     <main class="flex-grow flex items-center justify-center my-8 w-full max-w-2xl mx-auto">
         
+        <!-- ЭКРАН НАСТРОЕК -->
         <div id="setup-screen" class="w-full bg-[#0d1210] border border-[#00ff88]/15 p-6 rounded-xl shadow-[0_0_25px_rgba(0,255,136,0.03)]">
             <h1 class="text-2xl text-center font-bold tracking-widest mb-7 uppercase text-white border-b border-[#00ff88]/20 pb-4">
                 Инициализация Миссии
@@ -101,14 +102,15 @@
             </button>
         </div>
 
-
+        <!-- ЭКРАН С КАРТОЙ (РАЗДАЧА РОЛЕЙ) -->
         <div id="card-screen" class="w-full hidden flex flex-col items-center">
             <div class="text-center mb-6">
                 <div class="text-xs uppercase tracking-widest text-[#00ff88]/60 mb-1">Слияние // Раздача ролей</div>
                 <h2 id="player-turn-title" class="text-xl font-bold uppercase text-[#00ff88]">ИГРОК №1, ПРИМИТЕ ДАННЫЕ</h2>
             </div>
 
-            <div class="w-full max-w-[340px] h-[450px] perspective cursor-pointer" onclick="flipCard()">
+            <!-- Вся логика завязана на клик по этой карточке -->
+            <div class="w-full max-w-[340px] h-[450px] perspective cursor-pointer" onclick="handleCardClick()">
                 <div id="card-inner" class="card-inner w-full h-full relative rounded-xl border border-[#00ff88]/20 shadow-2xl">
                     
                     <div class="card-front absolute inset-0 bg-[#0d1210] flex flex-col items-center justify-between p-7">
@@ -134,21 +136,16 @@
                             <span id="card-status-label">STATUS: OK</span>
                         </div>
                         
-                        <div id="role-content" class="text-center w-full px-2">
-                            </div>
+                        <div id="role-content" class="text-center w-full px-2"></div>
 
-                        <div class="text-[11px] text-yellow-500/70 uppercase tracking-widest">Нажмите ещё раз, чтобы скрыть</div>
+                        <div class="text-[11px] text-yellow-500/70 uppercase tracking-widest">Нажмите ещё раз, чтобы скрыть роль</div>
                     </div>
 
                 </div>
             </div>
-
-            <button id="next-player-btn" onclick="nextPlayer()" class="mt-7 px-8 py-3 bg-transparent border border-[#00ff88]/40 text-[#00ff88] font-bold text-xs uppercase tracking-widest rounded opacity-0 pointer-events-none transition-all hover:bg-[#00ff88]/10">
-                Закрыть и передать →
-            </button>
         </div>
 
-
+        <!-- ИГРОВОЙ ЭКРАН С ТАЙМЕРОМ -->
         <div id="game-screen" class="w-full hidden bg-[#0d1210] border border-[#00ff88]/15 p-6 rounded-xl text-center">
             <h2 class="text-2xl font-bold tracking-widest uppercase text-red-500 mb-2">Шпионы в сети</h2>
             <p class="text-xs text-[#00ff88]/60 uppercase tracking-wider mb-6">Миссия: Задавайте вопросы. Вычислите врага!</p>
@@ -196,76 +193,59 @@
         const HF_API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta";
         const HF_TOKEN = "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";
 
-        // База Бравл Старс
-        const DB_BRAWL_STARS = ["Шелли", "Нита", "Кольт", "Булл", "Брок", "Эль Примо", "Барли", "Поко", "Роза", "Рико", "Дэррил", "Пенни", "Карл", "Джеки", "Гас", "Бо", "Эмз", "Сту", "Пайпер", "Пам", "Фрэнк", "Биби", "Беа", "Нани", "Эдгар", "Грифф", "Гром", "Бонни", "Гейл", "Колетт", "Вольт", "Лу", "Гавс", "Белль", "Базз", "Эш", "Лола", "Фэнг", "Ева", "Джанет", "Отис", "Сэм", "Бастер", "Мэнди", "Грей", "Р-Т", "Мэйси", "Хэнк", "Корделиус", "Даг", "Перл", "Чарли", "Мико", "Ларри и Лори", "Мелоди", "Лили", "Клэнси", "Берри", "Анджело", "Мо", "Кэнджи", "Драко", "Кит", "Честер", "Мег", "Амбер", "Сэнди", "Леон", "Ворон", "Спайк", "Тара", "Мортис", "Джин", "Макс", "Мистер П.", "Спраут", "Байрон", "Сквик"];
+        const poolCache = {
+            brawl: [],
+            clash: [],
+            games: [],
+            music: [],
+            random: []
+        };
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function getUniqueWord(poolKey, sourceArray) {
+            if (!poolCache[poolKey] || poolCache[poolKey].length === 0) {
+                poolCache[poolKey] = shuffleArray(sourceArray);
+            }
+            return poolCache[poolKey].pop();
+        }
+
+        const DB_BRAWL_STARS = [
+            "Шелли", "Нита", "Кольт", "Булл", "Брок", "Эль Примо", "Барли", "Поко", "Роза", "Рико", "Дэррил", "Пенни", "Карл", "Джеки", "Гас", "Бо", "Эмз", "Сту", "Пайпер", "Пам", "Фрэнк", "Биби", "Беа", "Нани", "Эдгар", "Грифф", "Гром", "Бонни", "Гейл", "Колетт", "Вольт", "Лу", "Гавс", "Белль", "Базз", "Эш", "Лола", "Фэнг", "Ева", "Джанет", "Отис", "Сэм", "Бастер", "Мэнди", "Грей", "Р-Т", "Мэйси", "Хэнк", "Корделиус", "Даг", "Перл", "Чарли", "Мико", "Ларри и Лори", "Мелоди", "Лили", "Клэнси", "Берри", "Анджело", "Мо", "Кэнджи", "Драко", "Кит", "Честер", "Мег", "Амбер", "Сэнди", "Леон", "Ворон", "Спайк", "Тара", "Мортис", "Джин", "Макс", "Мистер П.", "Спраут", "Байрон", "Сквик", "Джуки", "Олли", "Шейд", "Гиперзаряд: Леон", "Гиперзаряд: Эдгар", "Гиперзаряд: Спайк", "Гиперзаряд: Фрэнк", "Гиперзаряд: Вольт"
+        ];
         
-        // База Clash Royale (Четкие големы + герои + эволюции)
         const DB_CLASH_ROYALE = [
             "Варвар", "Лучник", "Гигант", "Скелет", "Подрывник", "Воздушный шар", "Колдун", "П.Е.К.К.А", "Миньоны", "Всадник на кабане", "Валькирия", "Ведьма", "Принц", "Тёмный Принц", "Мушкетер", "Три мушкетера", "Элитные варвары", "Палач", "Бандитка", "Ночная ведьма", "Спарки", "Шахтер", "Гончая Лавы", "Мегарыцарь", "Всадница на баране", "Рыбак", "Электрогигант", "Дровосек", "Пламенный дракон", "Гоблинорез",
             "Обычный Голем", "Ледяной Голем", "Эликсирный Голем",
             "Герой: Король Скелетов", "Герой: Золотой Рыцарь", "Герой: Королева Лучниц", "Герой: Монах", "Герой: Маленький Принц",
-            "Эволюция Варваров", "Эволюция Скелетов", "Эволюция Мушкетера", "Эволюция Королевского рекрута", "Эволюция Рыцаря", "Эволюция Летучих мышей", "Эволюция Подрывника", "Эволюция Валькирии"
+            "Эволюция Варваров", "Эволюция Скелетов", "Эволюция Мушкетера", "Эволюция Королевского рекрута", "Эволюция Рыцаря", "Эволюция Летучих мышей", "Эволюция Подрывника", "Эволюция Валькирии", "Эволюция Гоблинов", "Эволюция Электроволшебника", "Эволюция Заклинания Зап"
         ];
         
-        // ОБНОВЛЕНО: Только САМЫЕ ПОПУЛЯРНЫЕ игры из Play Market / App Store и ПК-хиты
-        const DB_GAMES = {
-            mobile: ["Standoff 2", "PUBG Mobile", "Brawl Stars", "Clash Royale", "Roblox", "Minecraft PE", "Subway Surfers", "Free Fire", "Genshin Impact", "Geometry Dash", "Among Us", "Clash of Clans", "EA SPORTS FC Mobile (FIFA)", "Call of Duty: Mobile"],
-            pc: ["Counter-Strike 2 (CS:GO)", "Мир Танков (World of Tanks)", "Dota 2", "GTA 5", "Minecraft PC", "Fortnite", "Valorant", "Apex Legends", "Cyberpunk 2077", "Forza Horizon 5"]
-        };
+        const DB_GAMES_ALL = ["Standoff 2", "PUBG Mobile", "Brawl Stars", "Clash Royale", "Roblox", "Minecraft PE", "Subway Surfers", "Free Fire", "Genshin Impact", "Geometry Dash", "Among Us", "Clash of Clans", "EA SPORTS FC Mobile", "Call of Duty: Mobile", "Counter-Strike 2", "Мир Танков", "Dota 2", "GTA 5", "Minecraft PC", "Fortnite", "Valorant", "Apex Legends", "Cyberpunk 2077", "Forza Horizon 5"];
+        const DB_GAMES_MOBILE = ["Standoff 2", "PUBG Mobile", "Brawl Stars", "Clash Royale", "Roblox", "Minecraft PE", "Subway Surfers", "Free Fire", "Genshin Impact", "Among Us", "Clash of Clans", "EA SPORTS FC Mobile"];
+        const DB_GAMES_PC = ["Counter-Strike 2", "Мир Танков", "Dota 2", "GTA 5", "Minecraft PC", "Fortnite", "Valorant", "Apex Legends", "Cyberpunk 2077"];
 
-        // ОБНОВЛЕНО: Чистые, точные названия музыкальных категорий без лишнего мусора
         const DB_MUSIC_CATEGORIES = [
-            "Баста", 
-            "США", 
-            "Бразильский фонк", 
-            "Русские хиты", 
-            "Детские песни", 
-            "Ностальгия", 
-            "Toxic", 
-            "Грустные песни", 
-            "Весёлые песни", 
-            "Кринж",
-            "Чемпионаты мира по футболу",
-            "Последний звонок",
-            "Патриотические песни",
-            "Связанные с Новым годом",
-            "Медленные песни",
-            "Романтические песни",
-            "Песни из фильмов",
-            "Летние песни"
+            "Баста", "США", "Бразильский фонк", "Русские хиты", "Детские песни", "Ностальгия", "Toxic", "Грустные песни", "Весёлые песни", "Кринж", "Чемпионаты мира по футболу", "Последний звонок", "Патриотические песни", "Связанные с Новым годом", "Медленные песни", "Романтические песни", "Песни из фильмов", "Летние песни", "Кухня", "Евровиденье", "90х-ые", "Мотивационые", "Песни у костра", "Игровые", "Из фильмов", "Традиционые", "Азия", "В машине", "2026 год", "Like", "2020", "Реп", "Хип-хоп", "Аниме", "Испанские", "Дорого Богато", "Мемы", "Легендарные", "Классика", "Страх", "Каверы", "Girl", "Реклама", "Утренние", "Бесячие", "Спорт", "Мексиканские", "Пацанские"
         ];
 
         const globalRandomWords = ["Аквапарк", "Подводная Лодка", "Космический Корабль", "Отель", "Банк", "Полицейский Участок", "Больница", "Музей", "Самолет", "Супермаркет", "Цирк", "Научная Лаборатория", "Школа", "Зоопарк", "Ресторан", "Стадион", "Метро", "Бункер"];
 
-        // Умный парсер категорий
         function getCategoryWordFromDB(topic) {
             let t = topic.toLowerCase().trim();
-            
-            // Фикс музыки: выдает одну из точных категорий из твоего списка
-            if (t === "песня" || t === "песни" || t === "музыка" || t === "музыкой" || t === "жанры" || t === "жанр") {
-                return DB_MUSIC_CATEGORIES[Math.floor(Math.random() * DB_MUSIC_CATEGORIES.length)];
-            }
-
-            // Фикс видеоигр: берет только топ популярные проекты
-            if (t === "игра" || t === "игры" || t === "видеоигра" || t === "видеоигры") {
-                const allGames = [...DB_GAMES.mobile, ...DB_GAMES.pc];
-                return allGames[Math.floor(Math.random() * allGames.length)];
-            }
-            if (t.includes("мобильн") || t.includes("play market") || t.includes("appstore") || t.includes("телефон") || t.includes("андроид")) {
-                return DB_GAMES.mobile[Math.floor(Math.random() * DB_GAMES.mobile.length)];
-            }
-            if (t.includes("компьютерн") || t.includes("пк") || t.includes("pc") || t.includes("кс") || t.includes("cs") || t.includes("танки")) {
-                return DB_GAMES.pc[Math.floor(Math.random() * DB_GAMES.pc.length)];
-            }
-            
-            // Проверка Игр Supercell
-            if (t.includes("бравл") || t.includes("brawl")) {
-                return DB_BRAWL_STARS[Math.floor(Math.random() * DB_BRAWL_STARS.length)];
-            }
-            if (t.includes("клеш") || t.includes("clash") || t.includes("рояль") || t.includes("карты")) {
-                return DB_CLASH_ROYALE[Math.floor(Math.random() * DB_CLASH_ROYALE.length)];
-            }
-            
+            if (t === "песня" || t === "песни" || t === "музыка" || t === "музыкой" || t === "жанры" || t === "жанр") return getUniqueWord('music', DB_MUSIC_CATEGORIES);
+            if (t === "игра" || t === "игры" || t === "видеоигра" || t === "видеоигры") return getUniqueWord('games', DB_GAMES_ALL);
+            if (t.includes("мобильн") || t.includes("play market") || t.includes("appstore") || t.includes("телефон") || t.includes("андроид")) return getUniqueWord('games', DB_GAMES_MOBILE);
+            if (t.includes("компьютерн") || t.includes("пк") || t.includes("pc") || t.includes("кс") || t.includes("cs") || t.includes("танки")) return getUniqueWord('games', DB_GAMES_PC);
+            if (t.includes("бравл") || t.includes("brawl")) return getUniqueWord('brawl', DB_BRAWL_STARS);
+            if (t.includes("клеш") || t.includes("clash") || t.includes("рояль") || t.includes("карты")) return getUniqueWord('clash', DB_CLASH_ROYALE);
             return null;
         }
 
@@ -274,7 +254,6 @@
             const btnAi = document.getElementById('btn-mode-ai');
             const btnManual = document.getElementById('btn-mode-manual');
             const btnRandom = document.getElementById('btn-mode-random');
-            
             const containerAi = document.getElementById('input-ai-container');
             const containerManual = document.getElementById('input-manual-container');
             const containerRandom = document.getElementById('input-random-container');
@@ -282,7 +261,6 @@
             [btnAi, btnManual, btnRandom].forEach(btn => {
                 btn.className = "py-3 px-2 rounded border text-[12px] font-bold tracking-wider uppercase transition-all bg-transparent border-[#00ff88]/30 text-[#00ff88]/50 hover:border-[#00ff88]/70";
             });
-            
             containerAi.classList.add('hidden');
             containerManual.classList.add('hidden');
             containerRandom.classList.add('hidden');
@@ -302,13 +280,11 @@
         function updateSliders() {
             totalPlayers = parseInt(document.getElementById('player-count').value);
             totalSpies = parseInt(document.getElementById('spy-count').value);
-            
             if (totalSpies >= totalPlayers - 1) {
                 totalSpies = totalPlayers - 2;
                 if(totalSpies < 1) totalSpies = 1;
                 document.getElementById('spy-count').value = totalSpies;
             }
-
             document.getElementById('player-count-val').innerText = totalPlayers;
             document.getElementById('spy-count-val').innerText = totalSpies;
         }
@@ -317,8 +293,7 @@
             const directDbMatch = getCategoryWordFromDB(topic);
             if (directDbMatch) return directDbMatch;
 
-            const prompt = `<|system|>You are a professional item-generator for the party game "Spy".
-The user will type a theme or category. Respond with exactly ONE specific element belonging to that category in Russian. No quotes, no explanations.</s><|user|>Тема: "${topic}"\nСлово:</s><|assistant|长`;
+            const prompt = `<|system|>You are a professional item-generator for the party game "Spy".\nThe user will type a theme or category. Respond with exactly ONE specific element belonging to that category in Russian. No quotes, no explanations.</s><|user|>Тема: "${topic}"\nСлово:</s><|assistant|>`;
             
             try {
                 const response = await fetch(HF_API_URL, {
@@ -329,7 +304,7 @@ The user will type a theme or category. Respond with exactly ONE specific elemen
                     },
                     body: JSON.stringify({
                         inputs: prompt,
-                        parameters: { max_new_tokens: 10, temperature: 0.1 }
+                        parameters: { max_new_tokens: 10, temperature: 0.3 }
                     }),
                     signal: AbortSignal.timeout(4000)
                 });
@@ -340,7 +315,6 @@ The user will type a theme or category. Respond with exactly ONE specific elemen
                     textResult = textResult.split("<|assistant|>").pop();
                 }
                 textResult = textResult.trim().replace(/["'‘“’`.]/g, '');
-                
                 if (!textResult || textResult.toLowerCase() === topic.toLowerCase()) {
                     return topic.charAt(0).toUpperCase() + topic.slice(1);
                 }
@@ -358,7 +332,7 @@ The user will type a theme or category. Respond with exactly ONE specific elemen
             if (gameMode === 'manual') {
                 secretWord = document.getElementById('custom-word-input').value.trim() || "Секретный Объект";
             } else if (gameMode === 'random') {
-                secretWord = globalRandomWords[Math.floor(Math.random() * globalRandomWords.length)];
+                secretWord = getUniqueWord('random', globalRandomWords);
             } else {
                 let topic = document.getElementById('topic-input').value.trim() || "песня";
                 secretWord = await generateWordViaAI(topic);
@@ -390,9 +364,6 @@ The user will type a theme or category. Respond with exactly ONE specific elemen
             document.getElementById('card-inner').classList.remove('flipped');
             document.getElementById('player-turn-title').innerText = `ИГРОК №${currentPlayerIndex + 1}, ПРИМИТЕ ДАННЫЕ`;
             
-            const nextBtn = document.getElementById('next-player-btn');
-            nextBtn.classList.add('opacity-0', 'pointer-events-none');
-
             const isSpy = rolesArray[currentPlayerIndex] === "ШПИОН";
             
             if (isSpy) {
@@ -423,50 +394,35 @@ The user will type a theme or category. Respond with exactly ONE specific elemen
             isTransitioning = false;
         }
 
-        function flipCard() {
+        // НОВАЯ ЕДИНАЯ ЛОГИКА КЛИКА ПО КАРТОЧКЕ
+        function handleCardClick() {
             if (isTransitioning) return;
             
-            isCardFlipped = !isCardFlipped;
             const cardInner = document.getElementById('card-inner');
-            const nextBtn = document.getElementById('next-player-btn');
+            isCardFlipped = !isCardFlipped;
 
             if (isCardFlipped) {
+                // Открываем карту
                 cardInner.classList.add('flipped');
-                nextBtn.classList.remove('opacity-0', 'pointer-events-none');
-                
-                if (currentPlayerIndex === totalPlayers - 1) {
-                    nextBtn.innerText = "ВКЛЮЧИТЬ ТАЙМЕР →";
-                } else {
-                    nextBtn.innerText = "Закрыть и передать →";
-                }
             } else {
+                // Закрываем карту и СРАЗУ переключаем на следующего игрока
+                isTransitioning = true;
                 cardInner.classList.remove('flipped');
-                nextBtn.classList.add('opacity-0', 'pointer-events-none');
+
+                setTimeout(() => {
+                    document.getElementById('role-content').innerHTML = `<div class="text-black">ЗАГРУЗКА...</div>`;
+                    
+                    if (currentPlayerIndex < totalPlayers - 1) {
+                        currentPlayerIndex++;
+                        showCardForPlayer();
+                    } else {
+                        // Если это был последний игрок — переходим на экран таймера
+                        document.getElementById('card-screen').classList.add('hidden');
+                        document.getElementById('game-screen').classList.remove('hidden');
+                        startTimer();
+                    }
+                }, 400); // 400мс — время анимации закрытия, чтобы данные не мелькали
             }
-        }
-
-        function nextPlayer() {
-            if (isTransitioning) return;
-            isTransitioning = true;
-
-            const cardInner = document.getElementById('card-inner');
-            const nextBtn = document.getElementById('next-player-btn');
-
-            nextBtn.classList.add('opacity-0', 'pointer-events-none');
-            cardInner.classList.remove('flipped');
-
-            setTimeout(() => {
-                document.getElementById('role-content').innerHTML = `<div class="text-black">ЗАГРУЗКА...</div>`;
-                
-                if (currentPlayerIndex < totalPlayers - 1) {
-                    currentPlayerIndex++;
-                    showCardForPlayer();
-                } else {
-                    document.getElementById('card-screen').classList.add('hidden');
-                    document.getElementById('game-screen').classList.remove('hidden');
-                    startTimer();
-                }
-            }, 400); 
         }
 
         function startTimer() {
